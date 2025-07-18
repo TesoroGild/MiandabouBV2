@@ -8,6 +8,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+//Application
+use App\Entity\Enums\ItemCategory;
+
 #[ORM\Entity(repositoryClass: ItemsRepository::class)]
 class Items
 {

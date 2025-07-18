@@ -1,14 +1,6 @@
 <?php
 
-namespace App\Entity;
-
-enum UserStatus: string
-{
-    case Admin = 'admin';
-    case Employee = 'employee';
-    case Client = 'client';
-}
-
+namespace App\Entity\Enums;
 
 enum ItemCategory: string
 {
