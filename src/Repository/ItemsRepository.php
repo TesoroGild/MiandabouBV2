@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Items;
+use App\Dto\ItemsDto;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,24 @@ class ItemsRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Items::class);
+    }
+
+    public function findAll(): array
+    {
+        $items = $this->findBy([]);
+        return array_map(function ($item) {
+            return new ItemsDto(
+                $item->getId(),
+                $item->getName(),
+                $item->getCategory()?->value,
+                $item->getDescription(),
+                $item->getPrice(),
+                $item->getQuantity(),
+                $item->getVideo(),
+                $item->getPicture(),
+                $item->getContenthash()
+            );
+        }, $items);
     }
 
 //    /**

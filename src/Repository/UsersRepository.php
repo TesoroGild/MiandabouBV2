@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Users;
+use App\Dto\UsersDto;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,24 @@ class UsersRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Users::class);
+    }
+
+    public function findAll(): array
+    {
+        $users = $this->findBy([]);
+        return array_map(function ($user) {
+            return new UsersDto(
+                $user->getId(),
+                $user->getName(),
+                $user->getFirstname(),
+                $user->getLastname(),
+                $user->getEmail(),
+                $user->getNumber(),
+                $user->getPicture(),
+                $user->getContenthash(),
+                $user->getRoles()
+            );
+        }, $users);
     }
 
 //    /**
@@ -31,13 +50,13 @@ class UsersRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Users
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+   public function findUser($email): ?Users
+   {
+       return $this->createQueryBuilder('u')
+           ->andWhere('u.email = :email')
+           ->setParameter('email', $email)
+           ->getQuery()
+           ->getOneOrNullResult()
+       ;
+   }
 }

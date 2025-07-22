@@ -45,7 +45,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 200, nullable: true)]
     private ?string $picture = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $contenthash = null;
 
     #[ORM\Column]
@@ -54,7 +54,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?\DateTime $timemodified = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTime $lastlogin = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
