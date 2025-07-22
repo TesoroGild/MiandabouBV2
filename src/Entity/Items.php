@@ -9,7 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 //Application
-use App\Entity\Enums\ItemCategory;
+use App\Enums\ItemCategory;
 
 #[ORM\Entity(repositoryClass: ItemsRepository::class)]
 class Items
@@ -37,7 +37,7 @@ class Items
     #[ORM\Column(length: 200, nullable: true)]
     private ?string $picture = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $contenthash = null;
 
     #[ORM\Column(length: 255, nullable: true)]
