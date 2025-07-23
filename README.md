@@ -1,5 +1,5 @@
 # Miandabou Accessoire Backend App
-Coming soon...
+Backend permettant de gérer le prototype de e-commerce de l'application Miandabou.
 
 # Utilisation
 Télecharger les dépendances

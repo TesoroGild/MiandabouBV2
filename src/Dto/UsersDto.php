@@ -10,7 +10,7 @@ class UsersDto
         public readonly string $firstname,
         public readonly string $lastname,
         public readonly string $email,
-        public readonly ?string $number,
+        public readonly ?string $phonenumber,
         public readonly array $roles,
         public readonly? string $picture,
         public readonly? string $contenthash

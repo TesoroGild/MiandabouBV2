@@ -23,14 +23,15 @@ class UsersRepository extends ServiceEntityRepository
         return array_map(function ($user) {
             return new UsersDto(
                 $user->getId(),
-                $user->getName(),
+                $user->getusername(),
                 $user->getFirstname(),
                 $user->getLastname(),
                 $user->getEmail(),
-                $user->getNumber(),
+                $user->getPhonenumber(),
+                $user->getRoles(),
                 $user->getPicture(),
-                $user->getContenthash(),
-                $user->getRoles()
+                $user->getContenthash()
+                
             );
         }, $users);
     }
@@ -50,13 +51,28 @@ class UsersRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-   public function findUser($email): ?Users
+   public function findUser($email): UsersDto | null
    {
-       return $this->createQueryBuilder('u')
+       $user = $this->createQueryBuilder('u')
            ->andWhere('u.email = :email')
            ->setParameter('email', $email)
            ->getQuery()
            ->getOneOrNullResult()
        ;
+
+       if ($user) {
+           return new UsersDto(
+               $user->getId(),
+                $user->getusername(),
+                $user->getFirstname(),
+                $user->getLastname(),
+                $user->getEmail(),
+                $user->getPhonenumber(),
+                $user->getRoles(),
+                $user->getPicture(),
+                $user->getContenthash()
+           );
+       }
+       return null;
    }
 }

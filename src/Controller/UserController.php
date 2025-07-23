@@ -13,6 +13,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Service\UploadService;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Security\UsersAuthenticator;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Firebase\JWT\JWT;
 
 final class UserController extends AbstractController
 {
@@ -27,9 +30,14 @@ final class UserController extends AbstractController
         $user->setLastname($request->request->get('lastname'));
         $email = $request->request->get('email');
         $user->setEmail($email);
-        $user->setNumber($request->request->get('number'));
+        $user->setPhonenumber($request->request->get('number'));
         $user->setRoles($request->request->all('roles'));
-        $user->setIsActive($request->request->get('status'));
+        $isActivate = $request->request->get('status');
+        if ($isActivate == "true" || $isActivate) {
+            $user->setIsActive(true);
+        } else {
+            $user->setIsActive(false);
+        }
         $dateString = $request->request->get('dateOfBirth');
         $date = \DateTime::createFromFormat('Y-m-d', $dateString);
         $user->setDateOfBirth($date);
@@ -50,21 +58,46 @@ final class UserController extends AbstractController
                 $request->request->get('password')
             )
         );
-
         $timestamp = new \DateTime();
         $user->setTimecreated($timestamp);
         $user->setTimemodified($timestamp);
 
-        //Ecriture en BDD
-        $entityManager->persist($user);
-        $entityManager->flush();
-
+        try {
+            //Ecriture en BDD
+            $entityManager->persist($user);
+            $entityManager->flush();
+        } catch (\Exception $e) {
+            $logger->error($e->getMessage());
+            return $this->json([
+                'user' => null,
+                'msg' => 'Erreur serveur! Reessayé plus tard.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
         $userAdded = $usersRepository->findUser($email);
 
-        return $this->json([
-            'user' => $userAdded,
-            'msg' => 'Utilisateur ajouté!'
-        ], Response::HTTP_CREATED);
+        if ($userAdded)
+        {
+            $payload = [
+                'user_id' => $userAdded->id,
+                'email' => $userAdded->email,
+                'roles' => $userAdded->roles,
+                'exp' => time() + 7200
+            ];
+            $jwt = JWT::encode($payload, $this->getParameter('jwt_secret'), 'HS256');
+
+            return $this->json([
+                'user' => $userAdded,
+                'token' => $jwt,
+                'msg' => 'Utilisateur ajouté et connecté!'
+            ], Response::HTTP_CREATED);
+        } else {
+            //404, 204 ou 202?
+            return $this->json([
+                'user' => null,
+                'msg' => 'Utilisateur non ajouté!'
+            ], Response::HTTP_NOT_FOUND);
+        }
     }
 
     #[Route('/api/users', name: 'list_users', methods: ['GET'])]

@@ -6,6 +6,7 @@
 parameters:
     pictures_directory: '%kernel.project_dir%/public/uploads/images'
     files_directory: '%kernel.project_dir%/public/uploads/files'
+    jwt_secret: '%env(JWT_SECRET)%'
 
 services:
     # default configuration for services in *this* file

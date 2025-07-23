@@ -6,10 +6,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class SecurityController extends AbstractController
 {
-    #[Route(path: '/api/login', name: 'app_login')]
+    #[Route('/api/login', name: 'app_login', methods: ['POST'])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         // if ($this->getUser()) {
@@ -24,9 +25,13 @@ class SecurityController extends AbstractController
         return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
 
-    #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(): void
+    #[Route('/api/logout', name: 'app_logout', methods: ['POST'])]
+    public function logout(): JsonResponse
     {
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+        return $this->json([
+            'user' => null,
+            'msg' => 'Utilisateur déconnecté!'
+        ], Response::HTTP_OK);
+        //throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 }

@@ -34,7 +34,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column(length: 20, nullable: true)]
-    private ?string $number = null;
+    private ?string $phonenumber = null;
 
     // #[ORM\Column(enumType: UserStatus::class)]
     // private ?UserStatus $role = null;
@@ -142,14 +142,14 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getNumber(): ?string
+    public function getPhonenumber(): ?string
     {
-        return $this->number;
+        return $this->phonenumber;
     }
 
-    public function setNumber(?string $number): static
+    public function setPhonenumber(?string $phonenumber): static
     {
-        $this->number = $number;
+        $this->phonenumber = $phonenumber;
 
         return $this;
     }
