@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Orders;
+use App\Entity\OrdersItems;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Orders>
+ * @extends ServiceEntityRepository<OrdersItems>
  */
-class OrdersRepository extends ServiceEntityRepository
+class OrdersItemsRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Orders::class);
+        parent::__construct($registry, OrdersItems::class);
     }
 
     //    /**
-    //     * @return Orders[] Returns an array of Orders objects
+    //     * @return OrdersItems[] Returns an array of OrdersItems objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class OrdersRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Orders
+    //    public function findOneBySomeField($value): ?OrdersItems
     //    {
     //        return $this->createQueryBuilder('o')
     //            ->andWhere('o.exampleField = :val')
@@ -40,14 +40,4 @@ class OrdersRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-
-    public function findOrder($orderCode): ?Orders
-       {
-           return $this->createQueryBuilder('o')
-               ->andWhere('o.exampleField = :val')
-               ->setParameter('val', $orderCode)
-               ->getQuery()
-               ->getOneOrNullResult()
-           ;
-       }
 }

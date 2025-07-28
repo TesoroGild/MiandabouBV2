@@ -19,6 +19,7 @@ class UsersRepository extends ServiceEntityRepository
 
     public function findAll(): array
     {
+        $pwd = "";
         $users = $this->findBy([]);
         return array_map(function ($user) {
             return new UsersDto(
@@ -31,7 +32,6 @@ class UsersRepository extends ServiceEntityRepository
                 $user->getRoles(),
                 $user->getPicture(),
                 $user->getContenthash()
-                
             );
         }, $users);
     }
@@ -62,7 +62,7 @@ class UsersRepository extends ServiceEntityRepository
 
        if ($user) {
            return new UsersDto(
-               $user->getId(),
+                $user->getId(),
                 $user->getusername(),
                 $user->getFirstname(),
                 $user->getLastname(),
@@ -74,5 +74,15 @@ class UsersRepository extends ServiceEntityRepository
            );
        }
        return null;
+   }
+
+   public function findUserForAuth($email): Users | null
+   {
+       return $this->createQueryBuilder('u')
+           ->andWhere('u.email = :email')
+           ->setParameter('email', $email)
+           ->getQuery()
+           ->getOneOrNullResult()
+       ;
    }
 }

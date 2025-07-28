@@ -13,6 +13,8 @@ class UsersDto
         public readonly ?string $phonenumber,
         public readonly array $roles,
         public readonly? string $picture,
-        public readonly? string $contenthash
+        public readonly? string $contenthash,
+        //Mettre le password est-il une bonne idee de conception?
+        //public readonly? string $password
     ) {}
 }

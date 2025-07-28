@@ -55,9 +55,16 @@ class Items
     #[ORM\ManyToMany(targetEntity: Orders::class, mappedBy: 'items')]
     private Collection $orders;
 
+    /**
+     * @var Collection<int, OrdersItems>
+     */
+    #[ORM\OneToMany(targetEntity: OrdersItems::class, mappedBy: 'items')]
+    private Collection $ordersItems;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
+        $this->ordersItems = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -207,6 +214,36 @@ class Items
     {
         if ($this->orders->removeElement($order)) {
             $order->removeItem($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrdersItems>
+     */
+    public function getOrdersItems(): Collection
+    {
+        return $this->ordersItems;
+    }
+
+    public function addOrdersItem(OrdersItems $ordersItem): static
+    {
+        if (!$this->ordersItems->contains($ordersItem)) {
+            $this->ordersItems->add($ordersItem);
+            $ordersItem->setItems($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrdersItem(OrdersItems $ordersItem): static
+    {
+        if ($this->ordersItems->removeElement($ordersItem)) {
+            // set the owning side to null (unless already changed)
+            if ($ordersItem->getItems() === $this) {
+                $ordersItem->setItems(null);
+            }
         }
 
         return $this;

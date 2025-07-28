@@ -13,8 +13,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Service\UploadService;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use App\Security\UsersAuthenticator;
-use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Firebase\JWT\JWT;
 
 final class UserController extends AbstractController
