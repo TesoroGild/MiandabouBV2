@@ -50,12 +50,6 @@ class Items
     private ?\DateTime $timemodified = null;
 
     /**
-     * @var Collection<int, Orders>
-     */
-    #[ORM\ManyToMany(targetEntity: Orders::class, mappedBy: 'items')]
-    private Collection $orders;
-
-    /**
      * @var Collection<int, OrdersItems>
      */
     #[ORM\OneToMany(targetEntity: OrdersItems::class, mappedBy: 'items')]
@@ -63,7 +57,6 @@ class Items
 
     public function __construct()
     {
-        $this->orders = new ArrayCollection();
         $this->ordersItems = new ArrayCollection();
     }
 
@@ -188,33 +181,6 @@ class Items
     public function setTimemodified(\DateTime $timemodified): static
     {
         $this->timemodified = $timemodified;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Orders>
-     */
-    public function getOrders(): Collection
-    {
-        return $this->orders;
-    }
-
-    public function addOrder(Orders $order): static
-    {
-        if (!$this->orders->contains($order)) {
-            $this->orders->add($order);
-            $order->addItem($this);
-        }
-
-        return $this;
-    }
-
-    public function removeOrder(Orders $order): static
-    {
-        if ($this->orders->removeElement($order)) {
-            $order->removeItem($this);
-        }
 
         return $this;
     }

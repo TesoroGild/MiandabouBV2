@@ -51,7 +51,7 @@ class UsersRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-   public function findUser($email): UsersDto | null
+   public function findUserDto($email): UsersDto | null
    {
        $user = $this->createQueryBuilder('u')
            ->andWhere('u.email = :email')
@@ -76,7 +76,7 @@ class UsersRepository extends ServiceEntityRepository
        return null;
    }
 
-   public function findUserForAuth($email): Users | null
+   public function findUser($email): Users | null
    {
        return $this->createQueryBuilder('u')
            ->andWhere('u.email = :email')

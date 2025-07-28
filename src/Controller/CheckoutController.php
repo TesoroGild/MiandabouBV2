@@ -15,99 +15,117 @@ use App\Entity\Address;
 use App\Repository\AddressRepository;
 use App\Repository\OrdersRepository;
 use App\Repository\UsersRepository;
+use App\Repository\ItemsRepository;
+use App\Entity\OrdersItems;
 
 final class CheckoutController extends AbstractController
 {
     #[Route('/api/checkout', name: 'app_checkout', methods: ['POST'])]
     public function setuporder(Request $request, LoggerInterface $logger,
         EntityManagerInterface $entityManager, UsersRepository $usersRepository,
-        AddressRepository $addressRepository, OrdersRepository $ordersRepository): JsonResponse
+        AddressRepository $addressRepository, OrdersRepository $ordersRepository,
+        ItemsRepository $itemsRepository): JsonResponse
     {
         //TODO
         //change name of method
+        $cmp = 0;
+        $cmpFor = 0;
+        
         try {
             //TEST ZONE
             $jsonData = json_decode($request->getContent(), true);
-            
-            // ORDER
-            $order = new Orders();
-            $userEmail = $jsonData['order']['userEmail'];
-            $order->setClient($usersRepository->findUser($userEmail));
-            $total = $jsonData['order']['total'];
-            $order->setTotal($total);
-            $timestamp = new \DateTime();
-            $order->setTimecreated($timestamp);
-            $expectedDateShipping = \DateTime::createFromFormat('Y-m-d', date('Y-m-d'));
-            $expectedDateShipping->modify('+1 week');
-            $timestring = $timestamp->format('Y-m-d');
-            //todo
-            $orderCode = $userEmail . $total . $timestring;
-            $order->setOrdercode($orderCode);
-            $itemsOrdered = $jsonData['items'];
-            foreach ($itemsOrdered as $item) {
-                $order->addItem($item);
-            }
 
             // ADDRESS
             $address = new Address();
             $fulladdress = $jsonData['address']['fulladdress'];
             $city = $jsonData['address']['city'];
             $zipcode = $jsonData['address']['zipcode'];
-            $state = $jsonData['address']['state'];
+            $province = $jsonData['address']['province'];
             $country = $jsonData['address']['country'];
             $appnumber = $jsonData['address']['appnumber'];
             $address->setFulladdress($fulladdress);
             $address->setCity($city);
             $address->setZipcode($zipcode);
-            $address->setState($state);
+            $address->setProvince($province);
             $address->setCountry($country);
             $address->setAppnumber($appnumber);
-            //users
-
+            
             $entityManager->persist($address);
-
-            // ORDER
-            $existingAddress = $addressRepository->findAddress($fulladdress, $city, $zipcode, $state, $country, $appnumber);
+            $entityManager->flush();
+            $existingAddress = $addressRepository->findAddress($fulladdress, $city, $zipcode, $province, $country, $appnumber);
 
             if ($existingAddress != null) {
-                $order->addAddress($existingAddress);
+                // ORDER
+                $order = new Orders();
+                $userEmail = $jsonData['order']['userEmail'];
+                $order->setClient($usersRepository->findUser($userEmail));
+                $cmp += 1;
+                $total = $jsonData['order']['total'];
+                $order->setTotal($total);
+                $cmp += 1;
+                $timestamp = new \DateTime();
+                $order->setTimecreated($timestamp);
+                $cmp += 1;
+                $expectedDateShipping = \DateTime::createFromFormat('Y-m-d', date('Y-m-d'));
+                $expectedDateShipping->modify('+1 week');
+                $timestring = $timestamp->format('Y-m-d');
+                //todo
+                $orderCode = $userEmail . $total . $timestring;
+                $order->setOrdercode($orderCode);$cmp += 1;
+                $order->setExpecteddateshipping($expectedDateShipping);$cmp += 1;
                 $meansofcommunication = $jsonData['additionalInfos']['meansofcommunication'];
+                
                 if ($meansofcommunication == "emailcommunication") $order->setCommunicationchannel($userEmail);
                 else if ($meansofcommunication == "phonecommunication") $order->setCommunicationchannel($jsonData['additionalInfos']['phonenumber']);
                 else $order->setCommunicationchannel('Aucune communication');
 
+                $order->addAddress($existingAddress);$cmp += 1;
+                
                 $entityManager->persist($order);
-                $entityManager->flush();
-
-                $orderRes = $ordersRepository->findOrder($orderCode);
+                $entityManager->flush();$cmp += 1;
+                $orderRes = $ordersRepository->findOrder($orderCode);$cmp += 1;
 
                 if ($orderRes != null) {
+                    $itemsOrdered = $jsonData['items'];
+                    $ordersItems = new OrdersItems();
+
+                    foreach ($itemsOrdered as $item) {
+                        $itm = $itemsRepository->findItem(intval($item['itemId']));
+                        $cmpFor += 1;
+
+                        if ($itm != null) {
+                            $ordersItems->setItems($itm);
+                            $ordersItems->setOrders($orderRes);
+                            $ordersItems->setQuantityBuy($item['quantityBuy']);
+                            $ordersItems->setItemPrice($item['itemPrice']);
+
+                            $entityManager->persist($ordersItems);
+                            $entityManager->flush();
+                        } else {
+                            return $this->json([
+                                'msg' => 'Erreur lors de la création de la commande. Veuillez recommencer dans quelques instants.'
+                            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                        }
+                    }
+
                     return $this->json([
-                        'order' => $order,
+                        'order' => $orderRes,
                         'items' => $itemsOrdered,
                         'address' => $existingAddress,
                         'msg' => 'Commande passée avec succès!'
                     ], Response::HTTP_OK);
                 } else {
-                    //**oublie pas de supprimer les donnees
                     return $this->json([
-                        'order' => $order,
-                        'items' => $itemsOrdered,
-                        'address' => $existingAddress,
-                        'msg' => 'ERREUR ORdER'
+                        'msg' => 'Erreur lors de la création de la commande. Veuillez recommencer dans quelques instants.'
                     ], Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             } else {
-                //**oublie pas de supprimer les donnees
                 return $this->json([
-                    'order' => $order,
-                    'items' => $itemsOrdered,
-                    'address' => $existingAddress,
-                'msg' => 'ERREUR ADDRESS'
+                    'msg' => 'Erreur lors de la création de la commande. Veuillez recommencer dans quelques instants.'
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-        } catch (\Exception $e) {
-            $logger->error('Erreur : ' . $e->getMessage());
+        } catch (\Throwable $t) {
+            $logger->error('Erreur : ' . $t->getMessage() . ' Debug compteur ' . $cmp . ' ' . $cmpFor);
             return $this->json(
                 ['msg' => "Erreur inattendue."],
                 Response::HTTP_INTERNAL_SERVER_ERROR

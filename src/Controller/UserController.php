@@ -72,7 +72,7 @@ final class UserController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         
-        $userAdded = $usersRepository->findUser($email);
+        $userAdded = $usersRepository->findUserDto($email);
 
         if ($userAdded)
         {

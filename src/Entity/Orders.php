@@ -26,12 +26,6 @@ class Orders
     #[ORM\JoinColumn(nullable: false)]
     private ?Users $client = null;
 
-    /**
-     * @var Collection<int, Items>
-     */
-    #[ORM\ManyToMany(targetEntity: Items::class, inversedBy: 'orders')]
-    private Collection $items;
-
     #[ORM\Column(length: 255)]
     private ?string $ordercode = null;
 
@@ -55,7 +49,6 @@ class Orders
 
     public function __construct()
     {
-        $this->items = new ArrayCollection();
         $this->address = new ArrayCollection();
         $this->ordersItems = new ArrayCollection();
     }
@@ -97,30 +90,6 @@ class Orders
     public function setClient(?Users $client): static
     {
         $this->client = $client;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Items>
-     */
-    public function getItems(): Collection
-    {
-        return $this->items;
-    }
-
-    public function addItem(Items $item): static
-    {
-        if (!$this->items->contains($item)) {
-            $this->items->add($item);
-        }
-
-        return $this;
-    }
-
-    public function removeItem(Items $item): static
-    {
-        $this->items->removeElement($item);
 
         return $this;
     }

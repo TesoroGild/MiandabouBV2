@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Address;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @extends ServiceEntityRepository<Address>
@@ -41,24 +42,22 @@ class AddressRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function findAddress(string $fulladdress, string $city, string $zipcode, string $state, string $country, string $appnumber):? Address
+    public function findAddress(string $fulladdress, string $city, string $zipcode, string $province, string $country, string $appnumber):? Address
     {
         return $this->createQueryBuilder('a')
-        ->where('LOWER(a.fulladdressv) = LOWER(:fulladdress)')
-        ->andWhere('LOWER(a.city) = LOWER(:city)')
-        ->andWhere('a.zipcode = :zipcode')
-        ->andWhere('a.state = :state')
-        ->andWhere('LOWER(a.country) = LOWER(:country)')
-        ->andWhere('LOWER(a.appnumber) = LOWER(:appnumber)')
-        ->setParameters([
-            'fulladdress' => $fulladdress,
-            'city' => $city,
-            'zipcode' => $zipcode,
-            'state' => $state,
-            'country' => $country,
-            'appnumber' => $appnumber
-        ])
-        ->getQuery()
-        ->getOneOrNullResult();
+            ->where('LOWER(a.fulladdress) = LOWER(:fulladdress)')
+            ->andWhere('LOWER(a.city) = LOWER(:city)')
+            ->andWhere('a.zipcode = :zipcode')
+            ->andWhere('a.province = :province')
+            ->andWhere('LOWER(a.country) = LOWER(:country)')
+            ->andWhere('LOWER(a.appnumber) = LOWER(:appnumber)')
+            ->setParameter('fulladdress', $fulladdress)
+            ->setParameter('city', $city)
+            ->setParameter('zipcode', $zipcode)
+            ->setParameter('province', $province)
+            ->setParameter('country', $country)
+            ->setParameter('appnumber', $appnumber)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

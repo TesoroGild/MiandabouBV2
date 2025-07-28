@@ -19,7 +19,7 @@ class Address
     private ?string $city = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $state = null;
+    private ?string $province = null;
 
     #[ORM\Column(length: 255)]
     private ?string $zipcode = null;
@@ -68,14 +68,14 @@ class Address
         return $this;
     }
 
-    public function getState(): ?string
+    public function getProvince(): ?string
     {
-        return $this->state;
+        return $this->province;
     }
 
-    public function setState(string $state): static
+    public function setProvince(string $province): static
     {
-        $this->state = $state;
+        $this->province = $province;
 
         return $this;
     }

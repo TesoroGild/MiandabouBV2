@@ -28,7 +28,7 @@ final class AuthController extends AbstractController
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        $userToCheck = $usersRepository->findUserForAuth($email);
+        $userToCheck = $usersRepository->findUser($email);
         
         if (!$userToCheck) 
         {

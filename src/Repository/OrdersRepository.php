@@ -44,8 +44,8 @@ class OrdersRepository extends ServiceEntityRepository
     public function findOrder($orderCode): ?Orders
        {
            return $this->createQueryBuilder('o')
-               ->andWhere('o.exampleField = :val')
-               ->setParameter('val', $orderCode)
+               ->andWhere('o.ordercode = :ordercode')
+               ->setParameter('ordercode', $orderCode)
                ->getQuery()
                ->getOneOrNullResult()
            ;
