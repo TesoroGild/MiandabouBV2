@@ -1,7 +1,23 @@
 # Miandabou Accessoire Backend App
 Backend permettant de gérer le prototype de e-commerce de l'application Miandabou.
 
-# Utilisation
+# Installation et mises à jour
+Php : https://www.php.net/downloads.php
+Composer : https://getcomposer.org/download/
+Symfony : https://symfony.com/download
+Docker (postgressql) : https://youtu.be/Hs9Fh1fr5s8?si=XVC_kOeVtB-s379w
+
+# Lancement du programme
+Cloner le projet avec 
+```bash
+git clone [lien_du_repo]
+```
+
+Entrer dans le repertoire Miandabou
+```bash
+cd MiandabouBV2
+```
+
 Télecharger les dépendances
 ```bash
 composer install
@@ -82,3 +98,6 @@ Supprimer une table en ligne de commande
 ```bash
 docker exec -it [nom_du_container] -U [utilisateur] -d [nom_base_de_donnees] -c "DROP DATABASE [table];"
 ```
+
+# TODO
+* Refactoring dans les services.

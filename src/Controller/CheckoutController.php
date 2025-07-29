@@ -17,6 +17,12 @@ use App\Repository\OrdersRepository;
 use App\Repository\UsersRepository;
 use App\Repository\ItemsRepository;
 use App\Entity\OrdersItems;
+use App\Dto\OrdersDto;
+use App\Dto\OrdersItemsDto;
+use App\Dto\ItemsDto;
+use App\Dto\AddressesDto;
+use App\Service\MappingService;
+use App\Dto\ItemsOrderedDto;
 
 final class CheckoutController extends AbstractController
 {
@@ -24,7 +30,7 @@ final class CheckoutController extends AbstractController
     public function setuporder(Request $request, LoggerInterface $logger,
         EntityManagerInterface $entityManager, UsersRepository $usersRepository,
         AddressRepository $addressRepository, OrdersRepository $ordersRepository,
-        ItemsRepository $itemsRepository): JsonResponse
+        ItemsRepository $itemsRepository, MappingService $mappingService): JsonResponse
     {
         //TODO
         //change name of method
@@ -43,16 +49,21 @@ final class CheckoutController extends AbstractController
             $province = $jsonData['address']['province'];
             $country = $jsonData['address']['country'];
             $appnumber = $jsonData['address']['appnumber'];
-            $address->setFulladdress($fulladdress);
-            $address->setCity($city);
-            $address->setZipcode($zipcode);
-            $address->setProvince($province);
-            $address->setCountry($country);
-            $address->setAppnumber($appnumber);
-            
-            $entityManager->persist($address);
-            $entityManager->flush();
-            $existingAddress = $addressRepository->findAddress($fulladdress, $city, $zipcode, $province, $country, $appnumber);
+
+            $newAddress = $addressRepository->findAddress($fulladdress, $city, $zipcode, $province, $country, $appnumber);
+
+            if ($newAddress == null) {
+                $address->setFulladdress($fulladdress);
+                $address->setCity($city);
+                $address->setZipcode($zipcode);
+                $address->setProvince($province);
+                $address->setCountry($country);
+                $address->setAppnumber($appnumber);
+                
+                $entityManager->persist($address);
+                $entityManager->flush();
+                $existingAddress = $addressRepository->findAddress($fulladdress, $city, $zipcode, $province, $country, $appnumber);
+            } else $existingAddress = $newAddress;
 
             if ($existingAddress != null) {
                 // ORDER
@@ -87,7 +98,9 @@ final class CheckoutController extends AbstractController
 
                 if ($orderRes != null) {
                     $itemsOrdered = $jsonData['items'];
+                    $itemsToSave = [];
                     $ordersItems = new OrdersItems();
+                    $itemsDto = [];
 
                     foreach ($itemsOrdered as $item) {
                         $itm = $itemsRepository->findItem(intval($item['itemId']));
@@ -99,8 +112,15 @@ final class CheckoutController extends AbstractController
                             $ordersItems->setQuantityBuy($item['quantityBuy']);
                             $ordersItems->setItemPrice($item['itemPrice']);
 
-                            $entityManager->persist($ordersItems);
-                            $entityManager->flush();
+                            $itemsToSave[] = $ordersItems;
+                            $itemsDto[] = new ItemsOrderedDto(
+                                $itm->getId(),
+                                $itm->getName(),
+                                $item['itemPrice'],
+                                $item['quantityBuy'],
+                                $itm->getPicture(),
+                                $itm->getContenthash()
+                            );
                         } else {
                             return $this->json([
                                 'msg' => 'Erreur lors de la création de la commande. Veuillez recommencer dans quelques instants.'
@@ -108,10 +128,16 @@ final class CheckoutController extends AbstractController
                         }
                     }
 
+                    $entityManager->persist($ordersItems);
+                    $entityManager->flush();
+
+                    $ordersDto = $mappingService->mappingOrdersToDto($orderRes);
+                    $addressDto = $mappingService->mappingAddressToDto($existingAddress);
+
                     return $this->json([
-                        'order' => $orderRes,
-                        'items' => $itemsOrdered,
-                        'address' => $existingAddress,
+                        'order' => $ordersDto,
+                        'items' => $itemsDto,
+                        'address' => $addressDto,
                         'msg' => 'Commande passée avec succès!'
                     ], Response::HTTP_OK);
                 } else {
